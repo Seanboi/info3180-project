@@ -81,7 +81,7 @@
     formData.append('password', password.value);
     
     try {
-      const response = await fetch('/api/v1/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         body: formData,
         headers: {
@@ -104,7 +104,7 @@
           window.location.href = data.redirect;
         } else {
           // Default redirect if not specified by the server
-          // setTimeout(() => window.location.href = '/dashboard', 1000);
+          window.location.href = '/Users';
         }
       } else {
         errors.value = data.errors || ['Login failed. Please check your credentials and try again.'];

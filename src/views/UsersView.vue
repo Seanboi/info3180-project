@@ -68,7 +68,7 @@
       try {
         this.loading = true;
         // Get token from local storage
-        const token = localStorage.getItem('token');
+       
         
         // Get user ID either from route params or from token
         // Depending on your authentication implementation
@@ -78,7 +78,7 @@
           userId = localStorage.getItem('user_id');
         }
         
-        if (!userId || !token) {
+        if (!userId) {
           this.error = 'Authentication required';
           this.loading = false;
           return;
@@ -86,7 +86,7 @@
         
         // Make API request to get user details
         const res = await axios.get(`/api/users/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${userId}` }
         });
         
         this.user = res.data.user;

@@ -11,7 +11,6 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from flask_wtf.csrf import generate_csrf
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import CombinedMultiDict
 from .models import Users
 from.models import Favourite
 from .models import Profile
@@ -55,29 +54,32 @@ def send_text_file(file_name):
     file_dot_text = file_name + '.txt'
     return app.send_static_file(file_dot_text)
 
-@app.route('/api/register',methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register():
-    form = RegisterForm(CombinedMultiDict([request.form, request.files]))
-    
+    try:
+        # Get fields from request.form
+        name = request.form.get('name', '').strip()
+        username = request.form.get('username')
+        password = request.form.get('password')
+        email = request.form.get('email')
+        photo_file = request.files.get('photo')
 
-    if form.validate_on_submit():
-        name = form.name.data.strip()
-        username = form.username.data
-        password = form.password.data
-        email = form.email.data
-        photo_file = form.photo.data
+        if not all([name, username, password, email, photo_file]):
+            return jsonify({"error": True, "message": "Missing required fields"}), 400
 
         names = name.split(" ", 1)
         first_name = names[0]
         last_name = names[1] if len(names) > 1 else ''
 
+        # Save the uploaded file
         filename = secure_filename(photo_file.filename)
-        photo_path = os.path.join('uploads', filename)
+        upload_folder = os.path.join(os.getcwd(), 'uploads')
+        os.makedirs(upload_folder, exist_ok=True)
+        photo_path = os.path.join(upload_folder, filename)
         photo_file.save(photo_path)
 
+        # Create and add the new user
         new_user = Users(
-            #first_name=first_name,
-            #last_name=last_name,
             name=first_name + " " + last_name,
             username=username,
             password=password,
@@ -99,9 +101,10 @@ def register():
                 'date_joined': new_user.date_joined
             }
         }), 201
-    else:
-            errors = form_errors(form)
-            return jsonify({"errors": errors}), 400
+
+    except Exception as e:
+        print("Error during registration:", str(e))
+        return jsonify({"error": True, "message": "Server error"}), 500
 
 @app.route('/api/v1/csrf-token', methods=['GET'])
 def get_csrf():

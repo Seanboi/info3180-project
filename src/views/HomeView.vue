@@ -45,8 +45,7 @@ const goToRegister = () => {
 </script>
 
 <template>
-  <div class="home-hero" :style="{ backgroundImage: `url(${bg})` }">
-    <div class="container py-5">
+  <div class="container py-5">
     <div class="row mb-5">
       <div class="col-md-6 offset-md-3 text-center">
         <h1 class="display-4 mb-4">Welcome to Jam-Date</h1>
@@ -136,97 +135,29 @@ const goToRegister = () => {
       </div>
     </div>
   </div>
-  </div>
 </template>
 
-<style>
-:root {
-  --jam-green: #0B6623;
-  --jam-gold: #FFD700;
-  --jam-black: #000000;
-}
-
-.home-hero {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  min-height: 100vh;
-  padding-top: 100px;
-  padding-bottom: 100px;
-  color: white;
-}
-
-.display-4 {
-  color: var(--jam-gold);
-  font-weight: bold;
-  text-shadow: 2px 2px 4px #000;
-}
-
-.lead {
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-top: -10px;
-}
-
-.btn-primary,
-.btn-success {
-  font-weight: bold;
-  padding: 0.5rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 30px;
-  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
+<style scoped>
 .btn-primary {
-  background-color: var(--jam-black);
-  border-color: var(--jam-black);
+  background-color: #007bff;
+  border-color: #007bff;
 }
 
 .btn-success {
-  background-color: var(--jam-green);
-  border-color: var(--jam-green);
+  background-color: #28a745;
+  border-color: #28a745;
 }
 
 .card {
-  border: none;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+  transition: transform 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.card-body {
-  background-color: white;
-  color: black;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-
-.card.bg-light {
-  background-color: transparent !important;
-  border: none;
-  color: white;
-  text-align: center;
-}
-
-.card-title {
-  color: var(--jam-gold);
-  font-weight: bold;
-}
-
-.card.bg-light .col-md-4 {
-  background-color: var(--jam-green);
-  padding: 1rem;
-  border-radius: 10px;
-  margin: 0.5rem;
-  color: white;
-}
-
-.card.bg-light h5 {
-  color: white;
-  font-weight: bold;
+.card:hover {
+  transform: translateY(-5px);
 }
 
 .fas {
-  color: var(--jam-gold);
+  color: #007bff;
 }
-</style>
+</style> 
