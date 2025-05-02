@@ -46,6 +46,76 @@
         }
       }
     };
-</script>
-<style>
-</style>
+  </script>
+  <style>
+    .form-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .heading {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 2rem;
+  }
+  
+  .subheading {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #2c3e50;
+  }
+  
+  .user-info {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .user-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid #3498db;
+  }
+  
+  .profile-card {
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  
+  .profile-card p {
+    margin: 10px 0;
+  }
+  
+  .favorites-section {
+    background-color: #e8f4f8;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  .error {
+    color: #e74c3c;
+    font-weight: bold;
+    padding: 10px;
+    background-color: #fadbd8;
+    border-radius: 4px;
+  }
+  
+  .loading {
+    text-align: center;
+    color: #7f8c8d;
+    font-style: italic;
+    margin: 20px 0;
+  }
+  </style>
