@@ -94,6 +94,16 @@
       if (response.ok) {
         message.value = data.message || 'Login successful!';
         errors.value = [];
+
+
+        if (data.token) {
+          localStorage.setItem('jwt_token', data.token);
+        }
+
+      
+      if (data.user_id) {
+        localStorage.setItem('user_id', data.user_id);
+        }
         
         // Reset form fields after successful login
         username.value = '';

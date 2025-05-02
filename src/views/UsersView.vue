@@ -68,7 +68,7 @@
       try {
         this.loading = true;
         // Get token from local storage
-       
+        const token = localStorage.getItem('jwt_token');
         
         // Get user ID either from route params or from token
         // Depending on your authentication implementation
@@ -86,7 +86,7 @@
         
         // Make API request to get user details
         const res = await axios.get(`/api/users/${userId}`, {
-          headers: { Authorization: `Bearer ${userId}` }
+          headers: { Authorization: `Bearer ${token}` }
         });
         
         this.user = res.data.user;

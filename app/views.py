@@ -11,14 +11,16 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from flask_wtf.csrf import generate_csrf
 from werkzeug.utils import secure_filename
+from functools import wraps
 from .models import Users
 from.models import Favourite
 from .models import Profile
 from .forms import RegisterForm
 from .forms import LoginForm
 from .forms import ProfileForm
+import jwt
 import os
-
+import datetime
 
 ###
 # Routing for your application.
@@ -127,6 +129,20 @@ def login():
         # Check if user exists and verify password
         if user and check_password_hash(user.password, password):
             login_user(user)
+            
+            token_payload = {
+                'user_id': user.id,
+                'username': user.username,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1)  # Token expires in 1 day
+            }
+            
+            # Create the JWT token
+            token = jwt.encode(
+                token_payload,
+                app.config['SECRET_KEY'],
+                algorithm='HS256'
+            )
+            
             
             return jsonify({
                 'error': False,
@@ -678,6 +694,7 @@ def search_profiles():
 
 
 @app.route('/api/users/<user_id>',methods=['GET'])
+@login_required
 def get_user_details(user_id):
     # Query the database for the user
     user = Users.query.get(user_id)
@@ -745,6 +762,7 @@ def get_user_details(user_id):
 
 
 @app.route('/api/users/<user_id>/favourites',methods=['GET'])
+@login_required
 def getuserfavourites(user_id):
     # Check if the user exists
     user = Users.query.get(user_id)
@@ -830,6 +848,7 @@ def getuserfavourites(user_id):
 
 
 @app.route('/api/users/favourties/<N>',methods=['GET'])
+@login_required
 def gettop_favourited_users(n):
     # Validate the input parameter
     if n <= 0:
@@ -928,3 +947,52 @@ def add_header(response):
 @app.errorhandler(404)
 def page_not_found(e):
     return jsonify({"error": "Not Found"}), 404
+
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        
+        # Check if Authorization header exists and has Bearer token
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+        
+        if not token:
+            return jsonify({
+                'error': True,
+                'message': 'Authentication token is missing'
+            }), 401
+        
+        try:
+            # Decode the token
+            data = jwt.decode(
+                token,
+                app.config['SECRET_KEY'],
+                algorithms=['HS256']
+            )
+            
+            # Get the user from the token
+            current_user_id = data['user_id']
+            current_user = Users.query.get(current_user_id)
+            
+            if not current_user:
+                raise Exception('User not found')
+                
+        except jwt.ExpiredSignatureError:
+            return jsonify({
+                'error': True,
+                'message': 'Token has expired'
+            }), 401
+        except (jwt.InvalidTokenError, Exception) as e:
+            return jsonify({
+                'error': True,
+                'message': f'Invalid token: {str(e)}'
+            }), 401
+            
+        # Pass the user to the decorated function
+        return f(current_user, *args, **kwargs)
+    
+    return decorated
