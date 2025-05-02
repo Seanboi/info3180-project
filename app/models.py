@@ -13,8 +13,8 @@ class Users(db.Model):
     photo = db.Column(db.String(80))
     date_joined = db.Column(db.DateTime, default=db.func.current_timestamp())
     
-    def __init__(self, first_name, last_name, username, password, email=None, photo=None):
-        self.name = f"{first_name} {last_name}"   
+    def __init__(self, name, username, password, email=None, photo=None):
+        self.name = name   
         self.username = username
         self.password = generate_password_hash(password, method='pbkdf2:sha256')
         self.email = email
@@ -56,8 +56,9 @@ class Profile(db.Model):
     fav_school_subject = db.Column(db.String(80))
     political = db.Column(db.Boolean)
     religious = db.Column(db.Boolean)
+    family_oriented = db.Column(db.Boolean)
     
-    def __init__(self,user_id_fk, description, parish, biography, sex, race, birth_year,height, fav_cuisine, fav_colour, fav_school_subject, political, religious):
+    def __init__(self,user_id_fk, description, parish, biography, sex, race, birth_year,height, fav_cuisine, fav_colour, fav_school_subject, political, religious,family_oriented):
         self.user_id_fk = user_id_fk
         self.description = description
         self.parish = parish
@@ -71,6 +72,7 @@ class Profile(db.Model):
         self.fav_school_subject = fav_school_subject
         self.political = political
         self.religious = religious
+        self.family_oriented = family_oriented
         
     def get_id(self):
         try:

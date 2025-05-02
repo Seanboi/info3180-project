@@ -11,13 +11,13 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.security import check_password_hash
 from flask_wtf.csrf import generate_csrf
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import CombinedMultiDict
 from .models import Users
 from.models import Favourite
 from .models import Profile
 from .forms import RegisterForm
 from .forms import LoginForm
 from .forms import ProfileForm
-import re
 import os
 
 
@@ -57,16 +57,17 @@ def send_text_file(file_name):
 
 @app.route('/api/register',methods=['POST'])
 def register():
-    form = RegisterForm()
+    form = RegisterForm(CombinedMultiDict([request.form, request.files]))
+    
 
     if form.validate_on_submit():
-        fullname = form.fullname.data.strip()
+        name = form.name.data.strip()
         username = form.username.data
         password = form.password.data
         email = form.email.data
         photo_file = form.photo.data
 
-        names = fullname.split(" ", 1)
+        names = name.split(" ", 1)
         first_name = names[0]
         last_name = names[1] if len(names) > 1 else ''
 
@@ -77,7 +78,7 @@ def register():
         new_user = Users(
             #first_name=first_name,
             #last_name=last_name,
-            fullname="first_name" +" "+ "last_name",
+            name=first_name + " " + last_name,
             username=username,
             password=password,
             email=email,
@@ -215,7 +216,8 @@ def profiles():
                 'fav_colour': profile.fav_colour,
                 'fav_school_subject': profile.fav_school_subject,
                 'political': profile.political,
-                'religious': profile.religious
+                'religious': profile.religious,
+                'family_oriented':profile.family_oriented
             }
             result.append(profile_data)
         
@@ -276,7 +278,8 @@ def profiles():
                 fav_colour=form.fav_colour.data, 
                 fav_school_subject=form.fav_school_subject.data,
                 political=form.political.data,
-                religious=form.religious.data
+                religious=form.religious.data,
+                family_oriented=form.family_oriented.data
             )
             
             # Save to database
@@ -300,7 +303,8 @@ def profiles():
                     'fav_colour': new_profile.fav_colour,
                     'fav_school_subject': new_profile.fav_school_subject,
                     'political': new_profile.political,
-                    'religious': new_profile.religious
+                    'religious': new_profile.religious,
+                    'family_oriented': new_profile.family_oriented
                 }
             }), 201
         else:
@@ -314,7 +318,7 @@ def profiles():
 
 
 
-@app.route('/api/profiles/{profile_id}',methods=['GET'])
+@app.route('/api/profiles/<profile_id>',methods=['GET'])
 @login_required
 def get_profile(profile_id):
     # Query the database for the profile
@@ -355,7 +359,8 @@ def get_profile(profile_id):
         'fav_colour': profile.fav_colour,
         'fav_school_subject': profile.fav_school_subject,
         'political': profile.political,
-        'religious': profile.religious
+        'religious': profile.religious,
+        'family_oriented':profile.family_oriented
     }
     
     return jsonify({
@@ -365,7 +370,7 @@ def get_profile(profile_id):
 
 
 
-@app.route('/api/profiles/{user_id}/favourite',methods=['POST'])
+@app.route('/api/profiles/<user_id>/favourite',methods=['POST'])
 @login_required
 def add_to_favourites(user_id):
     # Check if the user to be favorited exists
@@ -417,7 +422,7 @@ def add_to_favourites(user_id):
 
 
 
-@app.route('/api/profiles/matches/{profile_id}',methods=['GET'])
+@app.route('/api/profiles/matches/<profile_id>',methods=['GET'])
 @login_required
 def get_profile_matches(profile_id):
     # Check if the requested profile exists
@@ -486,6 +491,9 @@ def get_profile_matches(profile_id):
     # Match criteria 9: Same religious preference
     if request.args.get('match_religious', 'true').lower() == 'true':
         query = query.filter(Profile.religious == source_profile.religious)
+        
+    if request.args.get('match_family', 'true').lower() == 'true':
+        query = query.filter(Profile.family_oriented == source_profile.family_oriented)
     
     # Execute the query with pagination
     profiles_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -531,6 +539,9 @@ def get_profile_matches(profile_id):
         
         if profile.religious == source_profile.religious:
             match_score += 1
+            
+        if profile.family_oriented == source_profile.family_oriented:
+            match_score += 1
         
         # Calculate match percentage
         match_percentage = (match_score / 9) * 100
@@ -554,6 +565,7 @@ def get_profile_matches(profile_id):
             'fav_school_subject': profile.fav_school_subject,
             'political': profile.political,
             'religious': profile.religious,
+            'family_oriented': profile.family_oriented,
             'match_score': match_score,
             'match_percentage': round(match_percentage, 1)
         }
@@ -640,7 +652,8 @@ def search_profiles():
             'fav_colour': profile.fav_colour,
             'fav_school_subject': profile.fav_school_subject,
             'political': profile.political,
-            'religious': profile.religious
+            'religious': profile.religious,
+            'family_oriented': profile.family_oriented
         }
         result.append(profile_data)
     
@@ -661,15 +674,238 @@ def search_profiles():
 
 
 
-@app.route('/api/users/{user_id}',methods=['GET'])
+@app.route('/api/users/<user_id>',methods=['GET'])
+def get_user_details(user_id):
+    # Query the database for the user
+    user = Users.query.get(user_id)
+    
+    # Check if user exists
+    if not user:
+        return jsonify({
+            'error': True,
+            'message': 'User not found'
+        }), 404
+    
+    # Check if the user has a profile
+    profile = Profile.query.filter_by(user_id_fk=user_id).first()
+    
+    # Create the response data
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'name': user.name,
+        'email': user.email,
+        'photo': user.photo,
+        'date_joined': user.date_joined.isoformat() if user.date_joined else None,
+        'has_profile': profile is not None
+    }
+    
+    # If profile exists, include profile information
+    if profile:
+        user_data['profile'] = {
+            'id': profile.id,
+            'description': profile.description,
+            'parish': profile.parish,
+            'biography': profile.biography,
+            'sex': profile.sex,
+            'race': profile.race,
+            'birth_year': profile.birth_year,
+            'height': profile.height,
+            'fav_cuisine': profile.fav_cuisine,
+            'fav_colour': profile.fav_colour,
+            'fav_school_subject': profile.fav_school_subject,
+            'political': profile.political,
+            'religious': profile.religious,
+            'family_oriented': profile.family_oriented
+        }
+    
+    # Add favorite count information
+    favorite_count = Favourite.query.filter_by(fav_user_id_fk=user_id).count()
+    user_data['favorite_count'] = favorite_count
+    
+    # Check if logged in user has favorited this user
+    is_favorited = False
+    if current_user.is_authenticated:
+        is_favorited = Favourite.query.filter_by(
+            user_id_fk=current_user.id,
+            fav_user_id_fk=user_id
+        ).first() is not None
+    
+    user_data['is_favorited'] = is_favorited
+    
+    # Return the user data
+    return jsonify({
+        'error': False,
+        'user': user_data
+    }), 200
 
 
 
-@app.route('/api/users/{user_id}/favourites',methods=['GET'])
+@app.route('/api/users/<user_id>/favourites',methods=['GET'])
+def getuserfavourites(user_id):
+    # Check if the user exists
+    user = Users.query.get(user_id)
+    if not user:
+        return jsonify({
+            'error': True,
+            'message': 'User not found'
+        }), 404
+    
+    # Check permissions - either the request is for the current user's favorites,
+    # or the current user has admin privileges (if implemented)
+    if not current_user.is_authenticated and user_id != current_user.id:
+        return jsonify({
+            'error': True,
+            'message': 'You can only view your own favorites'
+        }), 403
+    
+    # Get pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # Query for all favorites of this user with pagination
+    favourites_query = db.session.query(Favourite, Users, Profile)\
+        .join(Users, Favourite.fav_user_id_fk == Users.id)\
+        .outerjoin(Profile, Profile.user_id_fk == Users.id)\
+        .filter(Favourite.user_id_fk == user_id)
+    
+    # Apply pagination
+    favourites_pagination = favourites_query.paginate(page=page, per_page=per_page, error_out=False)
+    favourites_list = favourites_pagination.items
+    
+    # Prepare response data
+    result = []
+    for favourite, fav_user, profile in favourites_list:
+        # Build user data
+        favourite_data = {
+            'id': favourite.id,
+            'favorited_user': {
+                'id': fav_user.id,
+                'username': fav_user.username,
+                'name': fav_user.name,
+                'photo': fav_user.photo
+            }
+        }
+        
+        # Include profile information if available
+        if profile:
+            favourite_data['profile'] = {
+                'id': profile.id,
+                'description': profile.description,
+                'parish': profile.parish,
+                'biography': profile.biography,
+                'sex': profile.sex,
+                'race': profile.race,
+                'birth_year': profile.birth_year,
+                'height': profile.height,
+                'fav_cuisine': profile.fav_cuisine,
+                'fav_colour': profile.fav_colour,
+                'fav_school_subject': profile.fav_school_subject,
+                'political': profile.political,
+                'religious': profile.religious,
+                'family_oriented': profile.family_oriented
+            }
+        
+        result.append(favourite_data)
+    
+    # Return the favorites list with pagination info
+    return jsonify({
+        'error': False,
+        'user_id': user_id,
+        'username': user.username,
+        'favourites': result,
+        'pagination': {
+            'total': favourites_pagination.total,
+            'pages': favourites_pagination.pages,
+            'page': page,
+            'per_page': per_page,
+            'has_next': favourites_pagination.has_next,
+            'has_prev': favourites_pagination.has_prev
+        }
+    }), 200
 
 
 
-@app.route('/api/users/favourties/{N}',methods=['GET'])
+@app.route('/api/users/favourties/<N>',methods=['GET'])
+def gettop_favourited_users(n):
+    # Validate the input parameter
+    if n <= 0:
+        return jsonify({
+            'error': True,
+            'message': 'Parameter N must be a positive integer'
+        }), 400
+    
+    # Set a reasonable maximum to prevent excessive queries
+    max_limit = 50
+    if n > max_limit:
+        n = max_limit
+    
+    # Query for users with the count of times they've been favorited
+    # Using a subquery to count favorites and then joining with Users and Profile tables
+    favorited_users = db.session.query(
+        Users,
+        Profile,
+        db.func.count(Favourite.id).label('favorite_count')
+    ).join(
+        Favourite, Users.id == Favourite.fav_user_id_fk
+    ).outerjoin(
+        Profile, Users.id == Profile.user_id_fk
+    ).group_by(
+        Users.id, Profile.id
+    ).order_by(
+        db.desc('favorite_count')
+    ).limit(n).all()
+    
+    # Prepare response data
+    result = []
+    for user, profile, count in favorited_users:
+        # Build user data with favorite count
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'name': user.name,
+            'photo': user.photo,
+            'favorite_count': count
+        }
+        
+        # Include profile information if available
+        if profile:
+            user_data['profile'] = {
+                'id': profile.id,
+                'description': profile.description,
+                'parish': profile.parish,
+                'biography': profile.biography,
+                'sex': profile.sex,
+                'race': profile.race,
+                'birth_year': profile.birth_year,
+                'height': profile.height,
+                'fav_cuisine': profile.fav_cuisine,
+                'fav_colour': profile.fav_colour,
+                'fav_school_subject': profile.fav_school_subject,
+                'political': profile.political,
+                'religious': profile.religious,
+                'family_oriented': profile.family_oriented
+            }
+        
+        # Check if current user has favorited this user (if logged in)
+        is_favorited = False
+        if current_user.is_authenticated:
+            is_favorited = Favourite.query.filter_by(
+                user_id_fk=current_user.id,
+                fav_user_id_fk=user.id
+            ).first() is not None
+        
+        user_data['is_favorited'] = is_favorited
+        
+        result.append(user_data)
+    
+    # Return the list of top favorited users
+    return jsonify({
+        'error': False,
+        'top_users': result,
+        'count': len(result),
+        'limit': n
+    }), 200
 
 
 
@@ -687,6 +923,5 @@ def add_header(response):
 
 
 @app.errorhandler(404)
-def page_not_found(error):
-    """Custom 404 page."""
-    return render_template('404.html'), 404
+def page_not_found(e):
+    return jsonify({"error": "Not Found"}), 404

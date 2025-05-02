@@ -1,8 +1,11 @@
 <template>
   <header>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top jam-header">
       <div class="container-fluid">
-        <a class="navbar-brand" href="/">VueJS with Flask</a>
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img :src="jamDateLogo" alt="Jam Date Logo" class="logo-img me-2" />
+          <span class="brand-text">Jam Date</span>
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -31,8 +34,30 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
+import jamDateLogo from "@/assets/JamDate_Logo.png";
 </script>
 
 <style>
-/* Add any component specific styles here */
+.jam-header {
+  background-color: #0B6623;
+  padding: 0.5rem 1rem;
+}
+
+.logo-img {
+  height: 45px;
+  width: auto;
+}
+
+.nav-link {
+  color: white !important;
+  font-weight: normal;
+  margin-right: 1rem;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.nav-link.active {
+  font-weight: bold;
+  text-decoration: none;
+}
 </style>

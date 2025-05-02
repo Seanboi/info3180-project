@@ -1,7 +1,7 @@
 <template>
-      <footer class="mt-5">
+      <footer class="footer">
           <div class="container">
-              <p>Copyright &copy {{ year }} Flask Inc.</p>
+              <p>Copyright &copy {{ year }} JJBSAS Inc.</p>
           </div>
       </footer>
 </template>
@@ -13,5 +13,21 @@ const year = (new Date).getFullYear();
 </script>
 
 <style>
-/* Add any component specific styles here */
+.footer {
+  background-color: black;
+  color: #FFD700;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+}
+
+.footer-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.footer-text {
+  font-weight: bold;
+  margin: 0;
+}
 </style>
