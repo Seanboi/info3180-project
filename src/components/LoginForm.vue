@@ -1,8 +1,6 @@
 <template>
     <div class="login-form-container">
       <form id="loginForm" @submit.prevent="login" class="login-form">
-        <h2 class="form-title">Login</h2>
-        
         <div class="form-group mb-3">
           <label for="username" class="form-label">Username</label>
           <input type="text" id="username" v-model="username" class="form-control" required />
@@ -114,7 +112,7 @@
           window.location.href = data.redirect;
         } else {
           // Default redirect if not specified by the server
-          window.location.href = '/Users';
+          window.location.href = '/';
         }
       } else {
         errors.value = data.errors || ['Login failed. Please check your credentials and try again.'];
@@ -125,65 +123,77 @@
     }
   };
   </script>
-  
-  <style scoped>
-  .login-form-container {
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .form-title {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-  }
-  
-  .btn-primary {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-  }
-  
-  .btn-primary:hover {
-    background-color: #0069d9;
-  }
-  
-  .alert {
-    padding: 10px 15px;
-    border-radius: 4px;
-    margin-top: 15px;
-  }
-  
-  .alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-  
-  .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
-  </style>
+
+<style scoped>
+.login-form-container {
+  max-width: 500px; 
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.form-label {
+  color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+  text-align: left;
+  font-size: 15px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 15px;
+  background-color: white;
+  color: black;
+}
+
+.btn-primary {
+  background-color: #FFD700;
+  color: black;
+  font-weight: bold;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+.btn-primary:hover {
+  background-color: #e6c200;
+}
+
+.alert {
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+</style>

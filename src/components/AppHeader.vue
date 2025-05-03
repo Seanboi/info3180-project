@@ -20,30 +20,31 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto" v-if="isLoggedIn">
             <li class="nav-item">
-              <RouterLink to="/" class="nav-link active">Home</RouterLink>
+              <RouterLink to="/" class="nav-link" :class="{ active: $route.path === '/' }">Home</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink class="nav-link" to="/about">About</RouterLink>
+              <RouterLink to="/about" class="nav-link" :class="{ active: $route.path === '/about' }">About</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink class="nav-link" to="/Logout">Logout</RouterLink>
+              <RouterLink to="/Logout" class="nav-link" :class="{ active: $route.path === '/Logout' }">Logout</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink class="nav-link" to="/Users">Account</RouterLink>
+              <RouterLink to="/Users" class="nav-link" :class="{ active: $route.path === '/Users' }">Account</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink class="nav-link" to="/Add profile">Add Profile</RouterLink>
+              <RouterLink to="/addprofile" class="nav-link" :class="{ active: $route.path === '/addprofile' }">Add Profile</RouterLink>
             </li>
           </ul>
+
           <ul class="navbar-nav me-auto" v-else>
             <li class="nav-item">
-              <RouterLink to="/" class="nav-link active">Home</RouterLink>
+              <RouterLink to="/" class="nav-link" :class="{ active: $route.path === '/' }">Home</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink class="nav-link" to="/about">About</RouterLink>
+              <RouterLink to="/about" class="nav-link" :class="{ active: $route.path === '/about' }">About</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink class="nav-link" to="/Login">Login</RouterLink>
+              <RouterLink to="/Login" class="nav-link" :class="{ active: $route.path === '/Login' }">Login</RouterLink>
             </li>
           </ul>
         </div>

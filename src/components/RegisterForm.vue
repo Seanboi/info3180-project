@@ -1,8 +1,9 @@
 <template>
     <div class="register-form-container">
-      <form id="registerForm" @submit.prevent="register" class="register-form">
-        <h2 class="form-title">Register</h2>
-        
+      <form id="registerForm" @submit.prevent="register" class="register-form">  
+      <h1 class="form-title">Register!</h1>
+      <p class="subtitle">Join us at Jam Date Today!</p>
+      
         <div class="form-group mb-3">
           <label for="fullname" class="form-label">Full Name</label>
           <input type="text" id="fullname" name="name" v-model="name" class="form-control" required />
@@ -24,7 +25,7 @@
         </div>
         
         <div class="form-group mb-3">
-          <label for="photo" class="form-label">Profile Photo</label>
+          <label for="photo" class="form-label">Account Photo</label>
           <input type="file" id="photo" name="photo" @change="onFileChange" class="form-control" required />
         </div>
         
@@ -181,68 +182,89 @@
   
   <style scoped>
   .register-form-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .form-title {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-  }
-  
-  .form-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-  }
-  
-  .form-control {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-  }
-  
-  .btn-primary {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-  }
-  
-  .btn-primary:hover {
-    background-color: #0069d9;
-  }
-  
-  .alert {
-    padding: 10px 15px;
-    border-radius: 4px;
-    margin-top: 15px;
-  }
-  
-  .alert-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
-  
-  .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-  }
-  
-  .alert-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-  }
+  background-color: #FFD700;
+  border-radius: 12px;
+  padding: 2rem 2rem;
+  max-width: 500px;
+  margin: 3rem auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.form-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #0B6623;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 16px;
+  margin-bottom: 1.5rem;
+  color: black;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: black;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: none;
+  background-color: white;
+  color: black;
+}
+
+.btn-primary {
+  background-color: #0B6623;
+  color: white;
+  font-weight: bold;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+.btn-primary:hover {
+  background-color: #09541c;
+}
+
+.alert {
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border: 1px solid #bee5eb;
+}
   </style>

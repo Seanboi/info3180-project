@@ -74,6 +74,8 @@ class ProfileForm(FlaskForm):
     
     religious = BooleanField('Religious', default=False)
     
+    photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
+    
     def validate_birth_year(self, field):
         current_year = datetime.datetime.now().year
         age = current_year - field.data

@@ -237,7 +237,8 @@ def profiles():
                 'fav_school_subject': profile.fav_school_subject,
                 'political': profile.political,
                 'religious': profile.religious,
-                'family_oriented':profile.family_oriented
+                'family_oriented':profile.family_oriented,
+                'photo': profile.photo
             }
             result.append(profile_data)
         
@@ -299,7 +300,8 @@ def profiles():
                 fav_school_subject=form.fav_school_subject.data,
                 political=form.political.data,
                 religious=form.religious.data,
-                family_oriented=form.family_oriented.data
+                family_oriented=form.family_oriented.data,
+                photo=form.photo.data
             )
             
             # Save to database
@@ -324,7 +326,8 @@ def profiles():
                     'fav_school_subject': new_profile.fav_school_subject,
                     'political': new_profile.political,
                     'religious': new_profile.religious,
-                    'family_oriented': new_profile.family_oriented
+                    'family_oriented': new_profile.family_oriented,
+                    'photo':new_profile.photo
                 }
             }), 201
         else:
@@ -380,7 +383,8 @@ def get_profile(profile_id):
         'fav_school_subject': profile.fav_school_subject,
         'political': profile.political,
         'religious': profile.religious,
-        'family_oriented':profile.family_oriented
+        'family_oriented':profile.family_oriented,
+        'photo':profile.photo
     }
     
     return jsonify({
@@ -586,6 +590,7 @@ def get_profile_matches(profile_id):
             'political': profile.political,
             'religious': profile.religious,
             'family_oriented': profile.family_oriented,
+            'photo':profile.photo,
             'match_score': match_score,
             'match_percentage': round(match_percentage, 1)
         }
@@ -673,7 +678,8 @@ def search_profiles():
             'fav_school_subject': profile.fav_school_subject,
             'political': profile.political,
             'religious': profile.religious,
-            'family_oriented': profile.family_oriented
+            'family_oriented': profile.family_oriented,
+            'photo':profile.photo
         }
         result.append(profile_data)
     
@@ -739,7 +745,8 @@ def get_user_details(user_id):
             'fav_school_subject': profile.fav_school_subject,
             'political': profile.political,
             'religious': profile.religious,
-            'family_oriented': profile.family_oriented
+            'family_oriented': profile.family_oriented,
+            'photo':profile.photo
         }
     
     # Add favorite count information
@@ -827,7 +834,8 @@ def getuserfavourites(user_id):
                 'fav_school_subject': profile.fav_school_subject,
                 'political': profile.political,
                 'religious': profile.religious,
-                'family_oriented': profile.family_oriented
+                'family_oriented': profile.family_oriented,
+                'photo': profile.photo
             }
         
         result.append(favourite_data)

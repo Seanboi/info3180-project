@@ -57,8 +57,9 @@ class Profile(db.Model):
     political = db.Column(db.Boolean)
     religious = db.Column(db.Boolean)
     family_oriented = db.Column(db.Boolean)
+    photo = db.Column(db.String(80))
     
-    def __init__(self,user_id_fk, description, parish, biography, sex, race, birth_year,height, fav_cuisine, fav_colour, fav_school_subject, political, religious,family_oriented):
+    def __init__(self,user_id_fk, description, parish, biography, sex, race, birth_year,height, fav_cuisine, fav_colour, fav_school_subject, political, religious,family_oriented,photo):
         self.user_id_fk = user_id_fk
         self.description = description
         self.parish = parish
@@ -73,6 +74,7 @@ class Profile(db.Model):
         self.political = political
         self.religious = religious
         self.family_oriented = family_oriented
+        self.photo = photo
         
     def get_id(self):
         try:
