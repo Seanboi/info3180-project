@@ -18,12 +18,32 @@
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto">
+          <ul class="navbar-nav me-auto" v-if="isLoggedIn">
             <li class="nav-item">
               <RouterLink to="/" class="nav-link active">Home</RouterLink>
             </li>
             <li class="nav-item">
               <RouterLink class="nav-link" to="/about">About</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/Logout">Logout</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/Users">Account</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/Add profile">Add Profile</RouterLink>
+            </li>
+          </ul>
+          <ul class="navbar-nav me-auto" v-else>
+            <li class="nav-item">
+              <RouterLink to="/" class="nav-link active">Home</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/about">About</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink class="nav-link" to="/Login">Login</RouterLink>
             </li>
           </ul>
         </div>
@@ -34,7 +54,39 @@
 
 <script setup>
 import { RouterLink } from "vue-router";
+import { ref, onMounted, computed } from "vue";
 import jamDateLogo from "@/assets/JamDate_Logo.png";
+import axios from 'axios';
+
+const isLoggedIn = ref(false);
+const user = ref(null);
+
+onMounted(async () => {
+  const userId = localStorage.getItem('user_id');
+    isLoggedIn.value = !!userId;
+
+  if (isLoggedIn.value) {
+      try {
+        const userId = localStorage.getItem('user_id');
+          const userData = await axios.get(`/api/users/${userId}`);
+          user.value = userData.data.user;
+        
+      } catch (userErr) {
+        console.error("Error fetching user data:", userErr);
+      }
+    }
+
+  const checkLogin = () => {
+    const updatedUserId = localStorage.getItem('user_id');
+    isLoggedIn.value = !!updatedUserId;
+  };
+
+  checkLogin();
+
+  window.addEventListener('user-auth-changed', checkLogin);
+});
+
+
 </script>
 
 <style>

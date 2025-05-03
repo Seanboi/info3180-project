@@ -77,6 +77,9 @@
           // If no ID in route params, assume we're showing current user profile
           userId = localStorage.getItem('user_id');
         }
+
+        console.log('User ID:', userId);
+        console.log('JWT Token:', token);
         
         if (!userId) {
           this.error = 'Authentication required';

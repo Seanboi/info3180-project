@@ -5,6 +5,8 @@ import LoginView from '../views/LoginView.vue'
 import UsersView from '../views/UsersView.vue'
 import AddNewProfileView from '../views/AddNewProfileView.vue'
 import ProfileFavouritesView from '../views/ProfileFavouritesView.vue'
+import LogoutView from '../views/LogoutView.vue'
+
 
 
 const router = createRouter({
@@ -47,6 +49,11 @@ const router = createRouter({
       path: '/Favourites',
       name: 'Favourites',
       component: ProfileFavouritesView
+    },
+    {
+      path: '/Logout',
+      name: 'logout',
+      component: LogoutView
     }
 
   ]

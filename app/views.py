@@ -147,6 +147,8 @@ def login():
             return jsonify({
                 'error': False,
                 'message': 'Login successful',
+                'token': token,
+                'user_id': user.id,
                 'user': {
                     'id': user.id,
                     'name': user.name,
@@ -183,7 +185,6 @@ def logout():
 
 
 @app.route('/api/profiles',methods=['GET','POST'])
-@login_required
 def profiles():
     # GET request: Return all profiles
     if request.method == 'GET':
@@ -698,6 +699,8 @@ def search_profiles():
 def get_user_details(user_id):
     # Query the database for the user
     user = Users.query.get(user_id)
+    
+    
     
     # Check if user exists
     if not user:

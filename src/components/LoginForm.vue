@@ -101,8 +101,8 @@
         }
 
       
-      if (data.user_id) {
-        localStorage.setItem('user_id', data.user_id);
+      if (data.user && data.user.id) {
+        localStorage.setItem('user_id', data.user.id);
         }
         
         // Reset form fields after successful login

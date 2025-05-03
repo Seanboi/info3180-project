@@ -6,6 +6,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 
 
+
 app = Flask(__name__)
 csrf = CSRFProtect(app)
 app.config.from_object(Config)
@@ -18,7 +19,12 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-from app import views
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 
+
+from app import views
+from .models import Users
 
 

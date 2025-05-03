@@ -1,15 +1,20 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import bg from "@/assets/Home_Page_Background.jpg";
+import axios from 'axios';
 
 const router = useRouter();
 const latestProfiles = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref("");
+const isLoggedIn = ref(false);
+const user = ref(null);
 
 onMounted(async () => {
   try {
+    const userId = localStorage.getItem('user_id');
+    isLoggedIn.value = !!userId;
     // Fetch the latest profiles (most recent 4)
     const response = await fetch('/api/profiles');
     
@@ -25,6 +30,20 @@ onMounted(async () => {
     } else {
       errorMessage.value = data.message || "Failed to load latest profiles";
     }
+
+    if (isLoggedIn.value) {
+      try {
+        const userId = localStorage.getItem('user_id');
+          const userData = await axios.get(`/api/users/${userId}`);
+          user.value = userData.data.user;
+        
+      } catch (userErr) {
+        console.error("Error fetching user data:", userErr);
+      }
+    }
+
+    
+
   } catch (err) {
     console.error("Error fetching profiles:", err);
     errorMessage.value = "Error connecting to the server. Please try again later.";
@@ -35,6 +54,8 @@ onMounted(async () => {
   }
 });
 
+ // Check if user is logged in
+
 const goToLogin = () => {
   router.push('/login');
 };
@@ -42,10 +63,13 @@ const goToLogin = () => {
 const goToRegister = () => {
   router.push('/register');
 };
+
+
 </script>
 
 <template>
   <div class="container py-5">
+    <div v-if="!isLoggedIn">
     <div class="row mb-5">
       <div class="col-md-6 offset-md-3 text-center">
         <h1 class="display-4 mb-4">Welcome to Jam-Date</h1>
@@ -134,6 +158,15 @@ const goToRegister = () => {
         </div>
       </div>
     </div>
+  </div>
+  <div v-if="isLoggedIn && user">
+    <div class="row mb-4">
+        <div class="col-12">
+          <h1 class="display-5">Welcome back, {{ user.name }}!</h1>
+          <p class="lead">Here's what's happening on Jam-Date today</p>
+        </div>
+      </div>
+  </div>
   </div>
 </template>
 
