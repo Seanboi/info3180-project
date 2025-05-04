@@ -191,6 +191,7 @@ def profiles():
         # Get query parameters for filtering/pagination
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
+        show_latest = request.args.get('latest', '0') == '1'  # New flag
         
         # Optional filtering by parameters
         filters = {}
@@ -203,6 +204,9 @@ def profiles():
         if filters:
             for key, value in filters.items():
                 query = query.filter(getattr(Profile, key) == value)
+                
+        if show_latest:
+            query = query.order_by(Profile.id.desc())
         
         # Execute query with pagination
         profiles_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -266,12 +270,6 @@ def profiles():
             }), 401
         
         # Check if user already has a profile
-        existing_profile = Profile.query.filter_by(user_id_fk=current_user.id).first()
-        if existing_profile:
-            return jsonify({
-                'error': True,
-                'message': 'User already has a profile'
-            }), 409  # Conflict
         
         # Create and validate form
         form = ProfileForm()
@@ -285,6 +283,12 @@ def profiles():
         
         # Validate form data
         if form.validate_on_submit():
+            photo = form.photo.data
+            filename = secure_filename(photo.filename)
+            upload_folder = os.path.join(os.getcwd(), 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            photo_path = os.path.join(upload_folder, filename)
+            photo.save(photo_path)
             # Create new profile
             new_profile = Profile(
                 user_id_fk=current_user.id,
@@ -301,7 +305,7 @@ def profiles():
                 political=form.political.data,
                 religious=form.religious.data,
                 family_oriented=form.family_oriented.data,
-                photo=form.photo.data
+                photo=filename
             )
             
             # Save to database
@@ -397,6 +401,7 @@ def get_profile(profile_id):
 @app.route('/api/profiles/<user_id>/favourite',methods=['POST'])
 @login_required
 def add_to_favourites(user_id):
+    
     # Check if the user to be favorited exists
     user_to_favourite = Users.query.get(user_id)
     if not user_to_favourite:
@@ -406,7 +411,7 @@ def add_to_favourites(user_id):
         }), 404
     
     # Check if the user is trying to favorite themselves
-    if current_user.id == user_id:
+    if current_user.id == int(user_id):
         return jsonify({
             'error': True,
             'message': 'You cannot add yourself to favorites'
@@ -446,131 +451,72 @@ def add_to_favourites(user_id):
 
 
 
-@app.route('/api/profiles/matches/<profile_id>',methods=['GET'])
+@app.route('/api/profiles/matches/<int:profile_id>', methods=['GET'])
 @login_required
 def get_profile_matches(profile_id):
-    # Check if the requested profile exists
+    # Fetch the source profile
     source_profile = Profile.query.get(profile_id)
     if not source_profile:
-        return jsonify({
-            'error': True,
-            'message': 'Profile not found'
-        }), 404
-    
-    # Verify that the requesting user owns this profile or has permission
+        return jsonify({'error': True, 'message': 'Profile not found'}), 404
+
+    # Ensure the user has permission to view this profile's matches
     if source_profile.user_id_fk != current_user.id:
-        return jsonify({
-            'error': True,
-            'message': 'You do not have permission to view matches for this profile'
-        }), 403
-    
-    # Get query parameters for pagination
+        return jsonify({'error': True, 'message': 'You do not have permission to view matches for this profile'}), 403
+
+    # Pagination
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
-    
-    # Build the matching criteria query
-    # Start with all profiles except the source profile
+
+    # Build the initial query, excluding the source profile
     query = Profile.query.filter(Profile.id != profile_id)
-    
-    # Match criteria 1: Same parish
-    if request.args.get('match_parish', 'true').lower() == 'true':
-        query = query.filter(Profile.parish == source_profile.parish)
-    
-    # Match criteria 2: Opposite sex
+
+    # Apply "opposite sex" filter if required
     if request.args.get('match_opposite_sex', 'true').lower() == 'true':
         if source_profile.sex == 'Male':
             query = query.filter(Profile.sex == 'Female')
         elif source_profile.sex == 'Female':
             query = query.filter(Profile.sex == 'Male')
-        # If 'Other', no filtering is applied for this criterion
-    
-    # Match criteria 3: Similar age (within 5 years)
-    if request.args.get('match_age', 'true').lower() == 'true':
-        min_year = source_profile.birth_year - 5
-        max_year = source_profile.birth_year + 5
-        query = query.filter(Profile.birth_year.between(min_year, max_year))
-    
-    # Match criteria 4: Similar height (within 10 cm)
-    if request.args.get('match_height', 'true').lower() == 'true':
-        min_height = source_profile.height - 10
-        max_height = source_profile.height + 10
-        query = query.filter(Profile.height.between(min_height, max_height))
-    
-    # Match criteria 5: Same favorite cuisine
-    if request.args.get('match_cuisine', 'true').lower() == 'true':
-        query = query.filter(Profile.fav_cuisine == source_profile.fav_cuisine)
-    
-    # Match criteria 6: Same favorite color
-    if request.args.get('match_colour', 'true').lower() == 'true':
-        query = query.filter(Profile.fav_colour == source_profile.fav_colour)
-    
-    # Match criteria 7: Same favorite school subject
-    if request.args.get('match_subject', 'true').lower() == 'true':
-        query = query.filter(Profile.fav_school_subject == source_profile.fav_school_subject)
-    
-    # Match criteria 8: Same political preference
-    if request.args.get('match_political', 'true').lower() == 'true':
-        query = query.filter(Profile.political == source_profile.political)
-    
-    # Match criteria 9: Same religious preference
-    if request.args.get('match_religious', 'true').lower() == 'true':
-        query = query.filter(Profile.religious == source_profile.religious)
-        
-    if request.args.get('match_family', 'true').lower() == 'true':
-        query = query.filter(Profile.family_oriented == source_profile.family_oriented)
-    
-    # Execute the query with pagination
+
+    # Paginate the query results
     profiles_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     profiles_list = profiles_pagination.items
-    
-    # Prepare response data
+
+    # List to store matched profiles
     result = []
+
+    # Define match criteria
+    criteria = {
+        'match_parish': lambda p: p.parish == source_profile.parish,
+        'match_age': lambda p: abs(p.birth_year - source_profile.birth_year) <= 5,
+        'match_height': lambda p: abs(p.height - source_profile.height) <= 10,
+        'match_cuisine': lambda p: p.fav_cuisine == source_profile.fav_cuisine,
+        'match_colour': lambda p: p.fav_colour == source_profile.fav_colour,
+        'match_subject': lambda p: p.fav_school_subject == source_profile.fav_school_subject,
+        'match_political': lambda p: p.political == source_profile.political,
+        'match_religious': lambda p: p.religious == source_profile.religious,
+        'match_family': lambda p: p.family_oriented == source_profile.family_oriented
+    }
+
+    # Process each profile
     for profile in profiles_list:
-        # Get the associated user
         user = Users.query.get(profile.user_id_fk)
-        
-        # Skip if user doesn't exist
         if not user:
-            continue
-        
-        # Calculate match score (count how many criteria match)
+            continue  # Skip if no user associated with the profile
+
         match_score = 0
-        
-        if profile.parish == source_profile.parish:
-            match_score += 1
-        
-        if (source_profile.sex == 'Male' and profile.sex == 'Female') or \
-           (source_profile.sex == 'Female' and profile.sex == 'Male'):
-            match_score += 1
-        
-        if abs(profile.birth_year - source_profile.birth_year) <= 5:
-            match_score += 1
-        
-        if abs(profile.height - source_profile.height) <= 10:
-            match_score += 1
-        
-        if profile.fav_cuisine == source_profile.fav_cuisine:
-            match_score += 1
-        
-        if profile.fav_colour == source_profile.fav_colour:
-            match_score += 1
-        
-        if profile.fav_school_subject == source_profile.fav_school_subject:
-            match_score += 1
-        
-        if profile.political == source_profile.political:
-            match_score += 1
-        
-        if profile.religious == source_profile.religious:
-            match_score += 1
-            
-        if profile.family_oriented == source_profile.family_oriented:
-            match_score += 1
-        
+        total_criteria = 0
+
+        # Check each match criterion dynamically
+        for criterion, check in criteria.items():
+            if request.args.get(criterion, 'true').lower() == 'true':
+                total_criteria += 1
+                if check(profile):
+                    match_score += 1
+
         # Calculate match percentage
-        match_percentage = (match_score / 9) * 100
-        
-        # Build profile data with user information
+        match_percentage = (match_score / total_criteria * 100) if total_criteria > 0 else 0
+
+        # Create a dictionary with the profile data and match score
         profile_data = {
             'id': profile.id,
             'user_id': profile.user_id_fk,
@@ -590,19 +536,27 @@ def get_profile_matches(profile_id):
             'political': profile.political,
             'religious': profile.religious,
             'family_oriented': profile.family_oriented,
-            'photo':profile.photo,
+            'photo': profile.photo,
             'match_score': match_score,
             'match_percentage': round(match_percentage, 1)
         }
+
         result.append(profile_data)
-    
-    # Sort results by match percentage in descending order
-    result.sort(key=lambda x: x['match_percentage'], reverse=True)
-    
-    # Return paged results
-    return jsonify({
+
+    # Include the source_profile data in the response
+    response_data = {
         'error': False,
         'matches': result,
+        'source_profile': {
+            'id': source_profile.id,
+            'height': source_profile.height,
+            'fav_cuisine': source_profile.fav_cuisine,
+            'fav_colour': source_profile.fav_colour,
+            'fav_school_subject': source_profile.fav_school_subject,
+            'political': source_profile.political,
+            'religious': source_profile.religious,
+            'family_oriented': source_profile.family_oriented
+        },
         'pagination': {
             'total': profiles_pagination.total,
             'pages': profiles_pagination.pages,
@@ -611,7 +565,12 @@ def get_profile_matches(profile_id):
             'has_next': profiles_pagination.has_next,
             'has_prev': profiles_pagination.has_prev
         }
-    }), 200
+    }
+
+    return jsonify(response_data), 200
+
+
+
 
 
 
@@ -716,38 +675,36 @@ def get_user_details(user_id):
         }), 404
     
     # Check if the user has a profile
-    profile = Profile.query.filter_by(user_id_fk=user_id).first()
+    profiles = Profile.query.filter_by(user_id_fk=user_id).all()
     
     # Create the response data
     user_data = {
-        'id': user.id,
-        'username': user.username,
-        'name': user.name,
-        'email': user.email,
-        'photo': user.photo,
-        'date_joined': user.date_joined.isoformat() if user.date_joined else None,
-        'has_profile': profile is not None
-    }
-    
-    # If profile exists, include profile information
-    if profile:
-        user_data['profile'] = {
-            'id': profile.id,
-            'description': profile.description,
-            'parish': profile.parish,
-            'biography': profile.biography,
-            'sex': profile.sex,
-            'race': profile.race,
-            'birth_year': profile.birth_year,
-            'height': profile.height,
-            'fav_cuisine': profile.fav_cuisine,
-            'fav_colour': profile.fav_colour,
-            'fav_school_subject': profile.fav_school_subject,
-            'political': profile.political,
-            'religious': profile.religious,
-            'family_oriented': profile.family_oriented,
-            'photo':profile.photo
-        }
+    'id': user.id,
+    'username': user.username,
+    'name': user.name,
+    'email': user.email,
+    'photo': user.photo,
+    'date_joined': user.date_joined.isoformat() if user.date_joined else None,
+    'has_profile': len(profiles) > 0,
+    'profiles': [{
+        'id': p.id,
+        'description': p.description,
+        'parish': p.parish,
+        'biography': p.biography,
+        'sex': p.sex,
+        'race': p.race,
+        'birth_year': p.birth_year,
+        'height': p.height,
+        'fav_cuisine': p.fav_cuisine,
+        'fav_colour': p.fav_colour,
+        'fav_school_subject': p.fav_school_subject,
+        'political': p.political,
+        'religious': p.religious,
+        'family_oriented': p.family_oriented,
+        'photo': p.photo
+    } for p in profiles]
+}
+
     
     # Add favorite count information
     favorite_count = Favourite.query.filter_by(fav_user_id_fk=user_id).count()

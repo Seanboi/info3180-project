@@ -74,6 +74,8 @@ class ProfileForm(FlaskForm):
     
     religious = BooleanField('Religious', default=False)
     
+    family_oriented = BooleanField('Family Oriented', default=False)
+    
     photo = FileField('Photo', validators=[FileRequired(), FileAllowed(['jpg', 'png'], 'Images only!')])
     
     def validate_birth_year(self, field):

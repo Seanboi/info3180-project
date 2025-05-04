@@ -6,6 +6,8 @@ import UsersView from '../views/UsersView.vue'
 import AddNewProfileView from '../views/AddNewProfileView.vue'
 import ProfileFavouritesView from '../views/ProfileFavouritesView.vue'
 import LogoutView from '../views/LogoutView.vue'
+import ViewProfilesView from '../views/ViewProfilesView.vue'
+import ProfileMatchesView from '../views/ProfileMatchesView.vue'
 
 
 
@@ -54,6 +56,16 @@ const router = createRouter({
       path: '/Logout',
       name: 'logout',
       component: LogoutView
+    },
+    {
+      path: '/profiles/:id',
+      name: 'ViewProfile',
+      component: ViewProfilesView
+    },
+    {
+      path:'/profiles/matches/:id',
+      name: 'matchprofile',
+      component: ProfileMatchesView
     }
 
   ]

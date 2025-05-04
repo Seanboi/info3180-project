@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import { useRouter } from "vue-router";
 import axios from 'axios';
 
@@ -9,13 +9,25 @@ const isLoading = ref(true);
 const errorMessage = ref("");
 const isLoggedIn = ref(false);
 const user = ref(null);
+const showSearch = ref(false);
+
+// Search functionality
+const searchResults = ref([]);
+const isSearching = ref(false);
+const searchErrorMessage = ref('');
+const searchForm = reactive({
+  name: '',
+  birthYear: '',
+  sex: '',
+  race: ''
+});
 
 onMounted(async () => {
   try {
     const userId = localStorage.getItem('user_id');
     isLoggedIn.value = !!userId;
     // Fetch the latest profiles (most recent 4)
-    const response = await fetch('/api/profiles');
+    const response = await fetch('/api/profiles?latest=1&per_page=4');
     
     // Check if response is ok before trying to parse JSON
     if (!response.ok) {
@@ -41,8 +53,6 @@ onMounted(async () => {
       }
     }
 
-    
-
   } catch (err) {
     console.error("Error fetching profiles:", err);
     errorMessage.value = "Error connecting to the server. Please try again later.";
@@ -53,8 +63,7 @@ onMounted(async () => {
   }
 });
 
- // Check if user is logged in
-
+// Check if user is logged in
 const goToLogin = () => {
   router.push('/login');
 };
@@ -63,7 +72,64 @@ const goToRegister = () => {
   router.push('/register');
 };
 
+const toggleSearch = () => {
+  showSearch.value = !showSearch.value;
+  // Reset search results when hiding search
+  if (!showSearch.value) {
+    searchResults.value = [];
+  }
+};
 
+const performSearch = async () => {
+  isSearching.value = true;
+  searchErrorMessage.value = '';
+  
+  try {
+    // Build query parameters based on filled fields
+    const params = {};
+    if (searchForm.name) params.name = searchForm.name;
+    if (searchForm.birthYear) params.birth_year = searchForm.birthYear;
+    if (searchForm.sex) params.sex = searchForm.sex;
+    if (searchForm.race) params.race = searchForm.race;
+
+    // Make the API call without requiring authentication
+    const response = await axios.get('/api/search', { params });
+    
+    if (response.data && !response.data.error) {
+      searchResults.value = response.data.results || [];
+      // Display a message if no results were found
+      if (searchResults.value.length === 0 && !searchErrorMessage.value) {
+        searchErrorMessage.value = 'No profiles match your search criteria';
+      }
+    } else {
+      searchErrorMessage.value = response.data.message || 'Failed to retrieve search results';
+      searchResults.value = [];
+    }
+  } catch (err) {
+    console.error('Search error:', err);
+    searchErrorMessage.value = err.response?.data?.message || 'Error during search. Please try again.';
+    searchResults.value = [];
+  } finally {
+    isSearching.value = false;
+  }
+};
+
+
+const clearSearch = () => {
+  searchForm.name = '';
+  searchForm.birthYear = '';
+  searchForm.sex = '';
+  searchForm.race = '';
+  searchResults.value = [];
+};
+
+const viewProfile = (profileId) => {
+  router.push(`/profiles/${profileId}`);
+};
+
+const calculateAge = (birthYear) => {
+  return new Date().getFullYear() - birthYear;
+};
 </script>
 
 <template>
@@ -157,46 +223,164 @@ const goToRegister = () => {
         <div class="col-12">
           <h1 class="display-5">Welcome back, {{ user.name }}!</h1>
           <p class="lead">Here's what's happening on Jam-Date today</p>
-          <h2 class="text-center mb-4">Latest Profiles</h2>
-        <div v-if="isLoading" class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
+          
+          <!-- Search toggle button -->
+          <div class="text-center mb-4">
+            <button @click="toggleSearch" class="btn btn-lg" :class="{'btn-primary': !showSearch, 'btn-secondary': showSearch}">
+              <i class="bi" :class="{'bi-search': !showSearch, 'bi-x-lg': showSearch}"></i>
+              {{ showSearch ? 'Hide Search' : 'Search Profiles' }}
+            </button>
           </div>
-        </div>
-        <div v-else-if="errorMessage" class="alert alert-danger text-center">
-          <p>{{ errorMessage }}</p>
-          <p>Please try again later or contact support if the issue persists.</p>
-        </div>
-        <div v-else-if="latestProfiles.length === 0" class="text-center">
-          <p>No profiles available yet. Be the first to create one!</p>
-        </div>
-        <div v-else class="row">
-          <div v-for="profile in latestProfiles" :key="profile.id" class="col-md-3 mb-4">
-            <div class="card h-100">
-              <img 
-                :src="profile.photo ? `/uploads/${profile.photo}` : '/placeholder.jpg'" 
-                class="card-img-top" 
-                alt="Profile photo"
-                style="height: 200px; object-fit: cover;"
-              >
-              <div class="card-body">
-                <h5 class="card-title">{{ profile.name }}</h5>
-                <p class="card-text">
-                  <small>{{ profile.parish }} • {{ new Date().getFullYear() - profile.birth_year }} years</small>
-                </p>
-                <p class="card-text text-truncate">{{ profile.description }}</p>
+          
+          <!-- Search form -->
+          <div v-if="showSearch" class="search-container mb-5">
+            <div class="card">
+              <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Search Profiles</h4>
               </div>
-              <div class="card-footer bg-white border-top-0">
-                <button 
-                  class="btn btn-outline-primary btn-sm w-100"
-                  @click="router.push(`/profiles/${profile.id}`)"
+              <div class="card-body">
+                <form @submit.prevent="performSearch">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="name" class="form-label">Name</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        id="name" 
+                        v-model="searchForm.name"
+                        placeholder="Enter name or part of name"
+                      >
+                    </div>
+                    <div class="col-md-6">
+                      <label for="birthYear" class="form-label">Birth Year</label>
+                      <input 
+                        type="number" 
+                        class="form-control" 
+                        id="birthYear" 
+                        v-model="searchForm.birthYear"
+                        placeholder="e.g. 1990"
+                        min="1900"
+                        max="2006"
+                      >
+                    </div>
+                    <div class="col-md-6">
+                      <label for="sex" class="form-label">Sex</label>
+                      <select class="form-select" id="sex" v-model="searchForm.sex">
+                        <option value="">Select Sex</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="race" class="form-label">Race</label>
+                      <select class="form-select" id="race" v-model="searchForm.race">
+                        <option value="">Select Race</option>
+                        <option value="Black">Black</option>
+                        <option value="East Indian">East Indian</option>
+                        <option value="Caucasian">Caucasian</option>
+                        <option value="Chinese">Chinese</option>
+                        <option value="Mixed">Mixed</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div class="col-12 text-center mt-3">
+                      <button type="submit" class="btn btn-primary me-2" :disabled="isSearching">
+                        <span v-if="isSearching" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                        <span v-else class="bi bi-search me-1"></span>
+                        {{ isSearching ? 'Searching...' : 'Search' }}
+                      </button>
+                      <button type="button" class="btn btn-secondary" @click="clearSearch" :disabled="isSearching">
+                        <i class="bi bi-x-circle me-1"></i> Clear
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            
+            <!-- Search results -->
+            <div v-if="searchErrorMessage" class="alert alert-danger mt-4" role="alert">
+              {{ searchErrorMessage }}
+            </div>
+            
+            <div v-else-if="searchResults.length > 0" class="mt-4">
+              <h3 class="text-center mb-4">Search Results</h3>
+              <div class="row">
+                <div v-for="profile in searchResults" :key="profile.id" class="col-md-3 mb-4">
+                  <div class="card h-100">
+                    <img 
+                      :src="profile.photo ? `/uploads/${profile.photo}` : '/placeholder.jpg'" 
+                      class="card-img-top" 
+                      alt="Profile photo"
+                      style="height: 200px; object-fit: cover;"
+                    >
+                    <div class="card-body">
+                      <h5 class="card-title">{{ profile.name }}</h5>
+                      <p class="card-text">
+                        <small>{{ profile.parish }} • {{ calculateAge(profile.birth_year) }} years</small>
+                      </p>
+                      <p class="card-text text-truncate">{{ profile.description }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                      <button 
+                        class="btn btn-outline-primary btn-sm w-100"
+                        @click="viewProfile(profile.id)"
+                      >
+                        View Profile
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div v-else-if="searchResults.length === 0 && !isSearching && !searchErrorMessage" class="alert alert-info mt-4 text-center">
+              <p class="mb-0">No profiles match your search criteria. Please try different filters.</p>
+            </div>
+          </div>
+          
+          <!-- Latest profiles section -->
+          <h2 class="text-center mb-4">Latest Profiles</h2>
+          <div v-if="isLoading" class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div v-else-if="errorMessage" class="alert alert-danger text-center">
+            <p>{{ errorMessage }}</p>
+            <p>Please try again later or contact support if the issue persists.</p>
+          </div>
+          <div v-else-if="latestProfiles.length === 0" class="text-center">
+            <p>No profiles available yet. Be the first to create one!</p>
+          </div>
+          <div v-else class="row">
+            <div v-for="profile in latestProfiles" :key="profile.id" class="col-md-3 mb-4">
+              <div class="card h-100">
+                <img 
+                  :src="profile.photo ? `/uploads/${profile.photo}` : '/placeholder.jpg'" 
+                  class="card-img-top" 
+                  alt="Profile photo"
+                  style="height: 200px; object-fit: cover;"
                 >
-                  View Profile
-                </button>
+                <div class="card-body">
+                  <h5 class="card-title">{{ profile.name }}</h5>
+                  <p class="card-text">
+                    <small>{{ profile.parish }} • {{ new Date().getFullYear() - profile.birth_year }} years</small>
+                  </p>
+                  <p class="card-text text-truncate">{{ profile.description }}</p>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                  <button 
+                    class="btn btn-outline-primary btn-sm w-100"
+                    @click="router.push(`/profiles/${profile.id}`)"
+                  >
+                    View Profile
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
   </div>
@@ -212,7 +396,7 @@ const goToRegister = () => {
 .lead {
   font-size: 1.2rem;
   font-weight: 500;
-  color: white;
+  color: #000;
 }
 
 .container.py-5 {
@@ -256,6 +440,11 @@ const goToRegister = () => {
 
 .card-title {
   font-weight: 600;
+}
+
+.card-title {
+  font-weight: 600;
+  color: #000;
 }
 
 .card-text small {
@@ -312,4 +501,15 @@ const goToRegister = () => {
   color: white;
 }
 
-</style> 
+.search-container {
+  margin-bottom: 2rem;
+}
+
+.search-container .card-header {
+  background-color: #0B6623 !important;
+}
+
+.form-label {
+  font-weight: 500;
+}
+</style>

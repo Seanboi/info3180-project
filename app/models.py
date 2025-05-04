@@ -101,3 +101,7 @@ class Favourite(db.Model):
             return unicode(self.id)  # python 2 support
         except NameError:
             return str(self.id)  # python 3 support
+        
+        
+    def __repr__(self):
+        return f'<Favourite user={self.user_id_fk} fav={self.fav_user_id_fk}>'
