@@ -815,7 +815,7 @@ def getuserfavourites(user_id):
 
 
 
-@app.route('/api/users/favourties/<N>',methods=['GET'])
+@app.route('/api/users/favourites/<int:n>',methods=['GET'])
 @login_required
 def gettop_favourited_users(n):
     # Validate the input parameter

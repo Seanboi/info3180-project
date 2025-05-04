@@ -34,6 +34,9 @@
             <li class="nav-item">
               <RouterLink to="/addprofile" class="nav-link" :class="{ active: $route.path === '/addprofile' }">Add Profile</RouterLink>
             </li>
+            <li class="nav-item">
+              <RouterLink to="/Favourites" class="nav-link" :class="{ active: $route.path === '/Favourites' }">Reports</RouterLink>
+            </li>
           </ul>
 
           <ul class="navbar-nav me-auto" v-else>
