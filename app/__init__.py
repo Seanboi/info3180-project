@@ -4,10 +4,14 @@ from flask_login import login_user, logout_user, current_user, login_required,Lo
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
+import os
 
 
 
-app = Flask(__name__)
+app = Flask(__name__, 
+            static_folder=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'dist'),
+            static_url_path='')
+
 csrf = CSRFProtect(app)
 app.config.from_object(Config)
 
