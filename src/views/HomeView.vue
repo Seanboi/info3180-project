@@ -399,12 +399,29 @@ const calculateAge = (birthYear) => {
   color: #000;
 }
 
+/* Fixed background image implementation */
 .container.py-5 {
-  background-image: url('/images/Home_Page_Background.jpg');
+  /* Try the absolute path from public folder */
+  background-image: url('/images/Home_Page_Background.jpg'); 
   background-size: cover;
   background-position: center;
   color: white;
-  padding: 5rem 1rem;
+  padding: 5rem 1rem !important;
+  border-radius: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Made the before element transparent as requested */
+.container.py-5::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent; /* Completely transparent */
+  z-index: -1;
   border-radius: 10px;
 }
 
@@ -436,10 +453,6 @@ const calculateAge = (birthYear) => {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.card-title {
-  font-weight: 600;
 }
 
 .card-title {

@@ -26,19 +26,12 @@
               <RouterLink to="/about" class="nav-link" :class="{ active: $route.path === '/about' }">About</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink to="/Logout" class="nav-link" :class="{ active: $route.path === '/Logout' }">Logout</RouterLink>
-            </li>
-            <li class="nav-item">
               <RouterLink to="/Users" class="nav-link" :class="{ active: $route.path === '/Users' }">Account</RouterLink>
             </li>
             <li class="nav-item">
               <RouterLink to="/addprofile" class="nav-link" :class="{ active: $route.path === '/addprofile' }">Add Profile</RouterLink>
             </li>
-            <li class="nav-item">
-              <RouterLink to="/Favourites" class="nav-link" :class="{ active: $route.path === '/Favourites' }">Reports</RouterLink>
-            </li>
           </ul>
-
           <ul class="navbar-nav me-auto" v-else>
             <li class="nav-item">
               <RouterLink to="/" class="nav-link" :class="{ active: $route.path === '/' }">Home</RouterLink>
@@ -50,25 +43,31 @@
               <RouterLink to="/Login" class="nav-link" :class="{ active: $route.path === '/Login' }">Login</RouterLink>
             </li>
           </ul>
+          
+          <!-- Right-aligned menu items for logged in users -->
+          <ul class="navbar-nav ms-auto" v-if="isLoggedIn">
+            <li class="nav-item">
+              <RouterLink to="/Favourites" class="nav-link" :class="{ active: $route.path === '/Favourites' }">Reports</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink to="/Logout" class="nav-link" :class="{ active: $route.path === '/Logout' }">Logout</RouterLink>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
   </header>
 </template>
-
 <script setup>
 import { RouterLink } from "vue-router";
 import { ref, onMounted, computed } from "vue";
 import jamDateLogo from "@/assets/JamDate_Logo.png";
 import axios from 'axios';
-
 const isLoggedIn = ref(false);
 const user = ref(null);
-
 onMounted(async () => {
   const userId = localStorage.getItem('user_id');
     isLoggedIn.value = !!userId;
-
   if (isLoggedIn.value) {
       try {
         const userId = localStorage.getItem('user_id');
@@ -79,31 +78,23 @@ onMounted(async () => {
         console.error("Error fetching user data:", userErr);
       }
     }
-
   const checkLogin = () => {
     const updatedUserId = localStorage.getItem('user_id');
     isLoggedIn.value = !!updatedUserId;
   };
-
   checkLogin();
-
   window.addEventListener('user-auth-changed', checkLogin);
 });
-
-
 </script>
-
 <style>
 .jam-header {
   background-color: #0B6623;
   padding: 0.5rem 1rem;
 }
-
 .logo-img {
   height: 45px;
   width: auto;
 }
-
 .nav-link {
   color: white !important;
   font-weight: normal;
@@ -111,7 +102,6 @@ onMounted(async () => {
   font-size: 1rem;
   text-decoration: none;
 }
-
 .nav-link.active {
   font-weight: bold;
   text-decoration: none;

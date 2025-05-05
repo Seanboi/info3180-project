@@ -125,9 +125,11 @@ export default {
 
 <style>
 .form-container {
+  background-color: rgb(255, 200, 0);
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  border-radius: 12px;
 }
 .heading {
   color: #333;
@@ -140,6 +142,10 @@ export default {
   font-size: 1.5rem;
   color: #2c3e50;
 }
+.profile-block {
+  margin-bottom: 20px;
+}
+
 .user-info {
   background-color: #f9f9f9;
   padding: 20px;
@@ -178,6 +184,20 @@ export default {
   object-fit: cover;
   border: 2px solid #3498db;
 }
+router-link.match-button {
+  background-color: #2ecc71;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+router-link.match-button:hover {
+  background-color: #27ae60; 
+}
 .error {
   color: #e74c3c;
   font-weight: bold;
@@ -185,6 +205,7 @@ export default {
   background-color: #fadbd8;
   border-radius: 4px;
 }
+
 .loading {
   text-align: center;
   color: #7f8c8d;

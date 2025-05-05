@@ -60,9 +60,9 @@
       </div>
 
       <div class="form-group mb-3">
-        <label for="height" class="form-label">Height (in cm)</label>
+        <label for="height" class="form-label">Height (in inches)</label>
         <input type="number" id="height" v-model="height" class="form-control" required min="50" max="250" step="0.1" />
-        <small class="form-text text-muted">Between 50cm and 250cm</small>
+        <small class="form-text text-muted">Between 50inches and 250inches</small>
       </div>
 
       <div class="form-group mb-3">

@@ -29,7 +29,8 @@
     <div class="profile-buttons">
       <button class="button email-button">Email User</button>
       <button class="button favorite-button" @click="addToFavourites" :disabled="favourited">
-        {{ favourited ? 'Already in Favourites' : 'Add to Favorites' }}
+        <span v-if="favourited">❤️</span>
+        <span v-else>🤍</span>
       </button>
     </div>
   </div>
@@ -224,6 +225,14 @@ export default {
 }
 
 .favorite-button {
-  background: #ff1744;
+  background: transparent;
+  color: white;
+  font-size: 1.2em;
+  border: 2px solid white;
+  transition: all 0.3s ease;
+}
+
+.favorite-button:hover {
+  background: rgb(241, 88, 88);
 }
 </style>
