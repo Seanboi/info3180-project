@@ -1,5 +1,6 @@
 from flask import Flask
 from .config import Config
+from flask import Flask, send_from_directory 
 from flask_login import login_user, logout_user, current_user, login_required,LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -26,5 +27,17 @@ def load_user(user_id):
 
 from app import views
 from .models import Users
+
+
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def catch_all(path):
+    return send_from_directory(app.static_folder, path)
+
+# Import other routes
+
 
 
