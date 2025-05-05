@@ -27,14 +27,16 @@ import datetime
 # Routing for your application.
 ###
 
-@app.route('/')
-def index():
-    return send_from_directory(app.static_folder, 'index.html')
-
-
+@app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    return send_from_directory(app.static_folder, path)
+    # First check if the path is a file in the static folder
+    if path and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    
+    # For API routes, we should never reach here because they're defined above
+    # For all other routes, return the index.html to let Vue Router handle it
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 
