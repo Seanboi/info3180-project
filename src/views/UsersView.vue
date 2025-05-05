@@ -184,7 +184,7 @@ export default {
   object-fit: cover;
   border: 2px solid #3498db;
 }
-router-link.match-button {
+.profile-block.match-button {
   background-color: #2ecc71;
   color: white;
   padding: 8px 12px;
@@ -195,7 +195,7 @@ router-link.match-button {
   margin-top: 10px;
 }
 
-router-link.match-button:hover {
+.profile-block.match-button:hover {
   background-color: #27ae60; 
 }
 .error {
