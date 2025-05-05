@@ -11,12 +11,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-const loginMessage = ref('Logging you in...');
-
 import LoginForm from '../components/LoginForm.vue';
 
 const backgroundStyle = {
@@ -26,23 +20,6 @@ const backgroundStyle = {
   height: '100vh',
   width: '100vw',
 };
-
-const login = async () => {
-  try {
-    setTimeout(() => {
-      router.push('/login');
-    }, 2000);
-  } catch (error) {
-    console.error('Error during login:', error);
-    loginMessage.value = 'An error occurred during login. Please try again.';
-  }
-};
-
-onMounted(() => {
-  login();
-});
-
-
 </script>
 
 <style scoped>

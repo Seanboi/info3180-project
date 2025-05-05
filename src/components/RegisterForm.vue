@@ -168,8 +168,12 @@
         email.value = '';
         photo.value = null;
         
-        // Optional: Redirect to login page after successful registration
-        setTimeout(() => window.location.href = '/login', 2000);
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          // Default redirect if not specified by the server
+          window.location.href = '/login';
+        }
       } else {
         errors.value = data.errors || [data.message || 'Registration failed. Please try again.'];
       }

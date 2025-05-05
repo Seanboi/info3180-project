@@ -106,6 +106,16 @@
         // Reset form fields after successful login
         username.value = '';
         password.value = '';
+        
+        // Optional: Redirect to dashboard or home page after successful login
+        if (data.redirect) {
+          window.location.href = data.redirect;
+        } else {
+          // Default redirect if not specified by the server
+          window.location.href = '/';
+        }
+      } else {
+        errors.value = data.errors || ['Login failed. Please check your credentials and try again.'];
       }
     } catch (error) {
       console.error('Error:', error);
