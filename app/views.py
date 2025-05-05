@@ -18,6 +18,7 @@ from .models import Profile
 from .forms import RegisterForm
 from .forms import LoginForm
 from .forms import ProfileForm
+from flask import Flask, send_from_directory 
 import jwt
 import os
 import datetime
@@ -28,7 +29,13 @@ import datetime
 
 @app.route('/')
 def index():
-    return jsonify(message="This is the beginning of our API")
+    return send_from_directory(app.static_folder, 'index.html')
+
+
+@app.route('/<path:path>')
+def catch_all(path):
+    return send_from_directory(app.static_folder, path)
+
 
 
 ###
