@@ -40,7 +40,7 @@
               <RouterLink to="/about" class="nav-link" :class="{ active: $route.path === '/about' }">About</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink to="/Login" class="nav-link" :class="{ active: $route.path === '/Login' }">Login</RouterLink>
+              <RouterLink to="/login" class="nav-link" :class="{ active: $route.path === '/login' }">Login</RouterLink>
             </li>
           </ul>
           

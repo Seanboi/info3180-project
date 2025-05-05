@@ -6,6 +6,31 @@
   
   <script setup>
 import RegisterForm from '../components/RegisterForm.vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const regMessage = ref('Registering you...');
+
+
+const register = async () => {
+  try {
+
+    setTimeout(() => {
+      router.push('/login');
+    }, 2000);
+  } catch (error) {
+    console.error('Error during register:', error);
+    regMessage.value = 'An error occurred during register. Please try again.';
+    
+  }
+};
+
+onMounted(() => {
+  register();
+});
+
+
   </script>
   
   <style scoped>

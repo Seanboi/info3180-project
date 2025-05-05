@@ -168,14 +168,14 @@
         email.value = '';
         photo.value = null;
         
-        if (data.redirect) {
-          window.location.href = data.redirect;
-        } else {
-          // Default redirect if not specified by the server
-          window.location.href = '/login';
-        }
-      } else {
-        errors.value = data.errors || [data.message || 'Registration failed. Please try again.'];
+      //   if (data.redirect) {
+      //     window.location.href = data.redirect;
+      //   } else {
+      //     // Default redirect if not specified by the server
+      //     window.location.href = '/login';
+      //   }
+      // } else {
+      //   errors.value = data.errors || [data.message || 'Registration failed. Please try again.'];
       }
     } catch (error) {
       console.error('Error:', error);

@@ -57,6 +57,7 @@ onMounted(() => {
   showBox.value = true;
   logout();
 });
+
 </script>
 
 <style scoped>
