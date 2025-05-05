@@ -47,6 +47,7 @@
   
   <script setup>
   import { ref, onMounted } from 'vue';
+  import { useRouter } from 'vue-router';
   
   const name = ref('');
   const username = ref('');
@@ -57,6 +58,7 @@
   const errors = ref([]);
   const csrf_token = ref('');
   const csrfStatus = ref('');
+  const router = useRouter();
   
   function getCsrfToken() {
     fetch('/api/v1/csrf-token')
@@ -168,14 +170,11 @@
         email.value = '';
         photo.value = null;
         
-      //   if (data.redirect) {
-      //     window.location.href = data.redirect;
-      //   } else {
-      //     // Default redirect if not specified by the server
-      //     window.location.href = '/login';
-      //   }
-      // } else {
-      //   errors.value = data.errors || [data.message || 'Registration failed. Please try again.'];
+        setTimeout(() => {
+        router.push('/login');
+      }, 2000);
+       } else {
+         errors.value = data.errors || [data.message || 'Registration failed. Please try again.'];
       }
     } catch (error) {
       console.error('Error:', error);
