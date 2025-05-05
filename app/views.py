@@ -30,12 +30,21 @@ import datetime
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
-    # First check if the path is a file in the static folder
+    # First check if the path starts with /api - these should be handled by other routes
+    if path.startswith('api/'):
+        # This should never happen as API routes should be defined earlier
+        return jsonify({"error": "API endpoint not found"}), 404
+        
+    # Then check if it's a static file
     if path and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     
-    # For API routes, we should never reach here because they're defined above
-    # For all other routes, return the index.html to let Vue Router handle it
+    # For all other routes, return index.html to let Vue Router handle it
+    return send_from_directory(app.static_folder, 'index.html')
+
+# Add a special route for the root path to ensure it always serves index.html
+@app.route('/')
+def index():
     return send_from_directory(app.static_folder, 'index.html')
 
 
